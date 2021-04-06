@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 def raspar_tela(url):
     
     options = webdriver.ChromeOptions()
@@ -89,25 +86,40 @@ def gerar_gabarito(lxml, arquivo_gabarito):
     with open(arquivo_gabarito) as json_file:
         data = json.load(json_file)
 
+    indices_perguntas = []
+    possiveis_respostas = []
+    respostas_corretas = []
+
+    lista_perguntas = lxml.find_all('ul')
+    lista = []
+
+    for a in range(len(lista_perguntas)): 
+        if len(lista_perguntas[a].attrs) == 3:
+            indices_perguntas.append(lista_perguntas[a].attrs['data-question_id'])
+            possiveis_respostas.append(lista_perguntas[a].find_all('li'))
+
+    for a in range(len(indices_perguntas)): 
+        ind = data[indices_perguntas[a]]['correct']
+        for b in range(len(ind)):
+            if (ind[b]) == 1:
+                lista.append(possiveis_respostas[a][b].text.strip())
+        respostas_corretas.append(lista)
+        lista = []
+
     wpProQuiz_question_text = lxml.find_all(class_='wpProQuiz_question_text')
     perguntas = [(e.text).strip() for e in wpProQuiz_question_text]
-        
-    letras = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
-    gabarito_resumido = ""
-    count = 1
 
+    gabarito_resumido = ""
     gabarito_resumido += '\\begin{enumerate}\n'
-    for element in data:
-        gabarito_resumido += "\t% question " + str(count) + "\n\t\\item " + str(perguntas[count-1]) + "\n\n\t"
-        gabarito_binario = data[element]['correct']
-        for i in range(len(gabarito_binario)):
-            if (gabarito_binario[i] == 1):
-                gabarito_resumido += " " + str(letras[i]) + ", "
+    
+    for i in range(len(respostas_corretas)):
+        gabarito_resumido += "\t% question " + str(i+1) + "\n\t\\item " + str(perguntas[i]) + "\n\n\t"
+        for j in range(len(respostas_corretas[i])):
+            gabarito_resumido += " " + str(respostas_corretas[i][j]) + ", "
         gabarito_resumido = gabarito_resumido[:-2]
         gabarito_resumido += "\n\n"
-        count += 1
+    
     gabarito_resumido += '\\end{enumerate}'
-
     gbrs = bytes(gabarito_resumido, 'utf-8').decode('utf-8', 'ignore')
 
     return gbrs
