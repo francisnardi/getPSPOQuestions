@@ -85,17 +85,20 @@ def salvar_arquivos(gerados, gabarito):
         file.write(gabarito)
 
 
-def gerar_gabarito(arquivo_gabarito):
+def gerar_gabarito(lxml, arquivo_gabarito):
     with open(arquivo_gabarito) as json_file:
         data = json.load(json_file)
 
+    wpProQuiz_question_text = lxml.find_all(class_='wpProQuiz_question_text')
+    perguntas = [(e.text).strip() for e in wpProQuiz_question_text]
+        
     letras = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
     gabarito_resumido = ""
     count = 1
 
     gabarito_resumido += '\\begin{enumerate}\n'
     for element in data:
-        gabarito_resumido += "\t\item"
+        gabarito_resumido += "\t% question " + str(count) + "\n\t\\item " + str(perguntas[count-1]) + "\n\n\t"
         gabarito_binario = data[element]['correct']
         for i in range(len(gabarito_binario)):
             if (gabarito_binario[i] == 1):
@@ -121,7 +124,7 @@ def main():
     arquivo_gabarito = "gabarito.json"
     lxml = raspar_tela(url)
     ger = gerar_exame(lxml)
-    gbrt = gerar_gabarito(arquivo_gabarito)
+    gbrt = gerar_gabarito(lxml, arquivo_gabarito)
     salvar_arquivos(ger, gbrt)
 
 if __name__ == "__main__":
