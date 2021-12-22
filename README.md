@@ -2,11 +2,11 @@
 ## How to use it
 1. Clone the repository
 ``` bash
-git clone https://github.com/francisnardi/PSPO_I.git
+git clone https://github.com/francisnardi/pspo2.git
 ```
 2. Open the folder
 ``` bash
-cd PSPO_I
+cd pspo2
 ```
 3. Install the required libs
 ``` bash
